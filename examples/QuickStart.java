@@ -16,6 +16,8 @@ public final class QuickStart {
         String key = System.getenv("COINGECKO_DEMO_API_KEY");
         CoinGeckoDemoApiClient.Builder builder = CoinGeckoDemoApiClient.builder();
         if (key == null || key.isBlank()) {
+            // CoinGecko's API file marks every call as needing a key, but the public
+            // endpoint also accepts calls without one. This empty scheme sends none.
             builder.authentication("headerAuth", target -> { });
         } else {
             builder.headerAuth(key);

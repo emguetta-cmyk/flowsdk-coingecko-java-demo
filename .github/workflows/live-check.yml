@@ -1,0 +1,40 @@
+name: Live check
+
+# Runs the QuickStart example against the real, public CoinGecko API once a week.
+# It is deliberately separate from the Build workflow and has no badge: a CoinGecko outage
+# or rate limit must never turn the README red. The tests in Build do not need the network.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    name: QuickStart against api.coingecko.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Build the SDK
+        run: mvn -B package
+
+      - name: Run QuickStart without an API key
+        run: |
+          mvn -B -q dependency:build-classpath -Dmdep.outputFile=cp.txt
+          mkdir -p target/examples
+          javac -d target/examples -cp "target/coingecko-java-1.0.0.jar:$(cat cp.txt)" examples/QuickStart.java
+          java -cp "target/examples:target/coingecko-java-1.0.0.jar:$(cat cp.txt)" QuickStart
