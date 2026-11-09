@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    name: Compile on Java 17 and 21
+    name: Build and test on Java 17 and 21
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,8 +27,8 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
 
-      - name: Build the SDK
-        run: mvn -B package
+      - name: Build the SDK and run the tests (no network needed)
+        run: mvn -B verify
 
       - name: Compile the example
         run: |
